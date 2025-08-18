@@ -1,0 +1,52 @@
+Metadata-Version: 2.4
+Name: cnnClassifier
+Version: 0.0.0
+Summary: A small package for CNN based Chest X-ray Cancer Detection
+Home-page: https://github.com/Cleavestone Adungo/ChestXray-Cancer-Detection
+Author: Cleavestone Adungo
+Author-email: cleavestone94@gmail.com
+Project-URL: Bug Tracker, https://github.com/Cleavestone Adungo/ChestXray-Cancer-Detection/issues
+Description-Content-Type: text/markdown
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: project-url
+Dynamic: summary
+
+```
+.
+├── .github
+│   └── workflows
+│       └── .gitkeep
+├── src
+│   └── Chest_cancer_classification
+│       ├── __init__.py
+│       ├── components
+│       │   └── __init__.py
+│       ├── utils
+│       │   └── __init__.py
+│       ├── config
+│       │   ├── __init__.py
+│       │   └── configuration.py
+│       ├── pipeline
+│       │   └── __init__.py
+│       ├── entity
+│       │   └── __init__.py
+│       └── constants
+│           └── __init__.py
+├── config
+│   └── config.yaml
+├── dvc.yaml
+├── params.yaml
+├── requirements.txt
+├── setup.py
+├── research
+│   └── trials.ipynb
+├── templates
+│   └── index.html
+└── static
+    └── css
+        └── style.css
+```
