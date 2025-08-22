@@ -1,4 +1,3 @@
 artifacts
 logs
 venv
-dvc.lock
