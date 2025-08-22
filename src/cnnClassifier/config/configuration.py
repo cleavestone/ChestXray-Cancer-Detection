@@ -1,4 +1,4 @@
-from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig
+from cnnClassifier.entity.config_entity import DataIngestionConfig, PrepareBaseModelConfig, TrainingConfig,EvaluateConfig
 import os
 from cnnClassifier.constants import *
 from cnnClassifier.utils.common import read_yaml,create_directories
@@ -38,7 +38,7 @@ class ConfigurationManager:
             params_image_size=self.param.IMAGE_SIZE,
             params_learning_rate=self.param.LEARNING_RATE,  
             params_include_top=self.param.INCLUDE_TOP,
-            params_weights=self.param.WEIGHT,
+            params_weights=self.param.WEIGHTS,
             params_classes=self.param.CLASSES
         )
 
@@ -63,6 +63,17 @@ class ConfigurationManager:
         )
 
         return training_config
+    
+    def get_evaluation_config(self) -> EvaluateConfig:
+        eval_config=EvaluateConfig(
+            path_of_model=Path(self.config.training.trained_model_path),
+            training_data=Path(self.config.data_ingestion.unzip_dir,"Chest-CT-Scan-data"),
+            all_param=self.param,
+            mlflow_uri='https://dagshub.com/cleavestone94/ChestXray-Cancer-Detection.mlflow',
+            param_image_size=self.param.IMAGE_SIZE,
+            param_batch_size=self.param.BATCH_SIZE
+        )
+        return eval_config
 
 
 

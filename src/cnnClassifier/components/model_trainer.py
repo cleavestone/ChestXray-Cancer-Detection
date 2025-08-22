@@ -9,8 +9,7 @@ class Training:
         self.config=config
 
     def get_base_model(self):
-        model=tf.keras.models.load_model(self.config.updated_base_model_path)
-        return model
+        self.model=tf.keras.models.load_model(self.config.updated_base_model_path)
     
     def train_valid_generator(self):
         datagenerator_kwargs=dict(
@@ -64,7 +63,7 @@ class Training:
         self.steps_per_epoch=self.train_generator.samples // self.config.params_batch_size
         self.validation_steps=self.valid_generator.samples // self.config.params_batch_size
 
-        self.get_base_model().fit(
+        self.model.fit(
             self.train_generator,
             steps_per_epoch=self.steps_per_epoch,
             validation_data=self.valid_generator,
