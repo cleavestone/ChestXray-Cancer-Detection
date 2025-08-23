@@ -2,6 +2,7 @@ import numpy as np
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 import os
+import mlflow
 
 class PredictionPipeline:
     def __init__(self, filename):
@@ -9,7 +10,10 @@ class PredictionPipeline:
 
     def predict(self):
         # load model
-        model = load_model(os.path.join("artifacts", "training", "trained_model.h5"))
+        #model = load_model(os.path.join("artifacts", "training", "trained_model.h5"))
+        logged_model = 'runs:/6b7c3a0bfb574f4ba54530cc92b94a67/model'
+        # Load model as a PyFuncModel.
+        model = mlflow.pyfunc.load_model(logged_model)
         
         imagename = self.filename
         test_image = image.load_img(imagename, target_size=(224, 224))
