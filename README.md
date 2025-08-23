@@ -146,5 +146,82 @@ dvc repro
 ```bash
 python App.py
 ```
+# AWS CICD Deployment with GitHub Actions
+
+## 1. Login to AWS Console
+Log in to your AWS account to start the setup.
+
+---
+
+## 2. Create IAM User for Deployment
+Create a new IAM user with **specific access**:
+
+- **EC2 Access:** For managing virtual machines.  
+- **ECR Access:** Elastic Container Registry to save your Docker images in AWS.
+
+---
+## Create ECR Repository
+
+Create an **ECR repository** to store/save your Docker images.
+
+- Save the repository URI for later use:  905418209639.dkr.ecr.eu-north-1.amazonaws.com/cancer-proj
+---
+
+## 4. Description: About the Deployment
+The deployment workflow:
+
+1. Build Docker image of the source code.  
+2. Push your Docker image to ECR.  
+3. Launch your EC2 instance.  
+4. Pull your image from ECR on EC2.  
+5. Launch your Docker image in EC2.
+
+---
+
+## 4. Policy
+Attach the following policies to your IAM user:
+
+- `AmazonEC2ContainerRegistryFullAccess`  
+- `AmazonEC2FullAccess`
+---
+
+## 5. Create EC2 Machine
+- Use **Ubuntu** as the operating system.
+
+---
+## Configure EC2 as Self-Hosted Runner
+
+1. Go to your GitHub repository **Settings → Actions → Runners → New self-hosted runner**.  
+2. Choose your **operating system**.  
+3. Follow the instructions and run the commands on your EC2 instance **one by one** to register it as a self-hosted runner.
+---
+
+## 7. Install Docker on EC2
+**Optional:**
+```bash
+sudo apt-get update -y
+
+sudo apt-get upgrade -y
+#required
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+sudo sh get-docker.sh
+
+sudo usermod -aG docker ubuntu
+
+newgrp docker
+```
+
+## Setup GitHub Secrets
+
+In your GitHub repository, configure the following secrets:
+
+- `AWS_ACCESS_KEY_ID` = *your AWS access key ID*
+- `AWS_SECRET_ACCESS_KEY` = *your AWS secret access key*
+- `AWS_REGION` = *Region*
+- `AWS_ECR_LOGIN_URI` = `905418209639.dkr.ecr.eu-north-1.amazonaws.com/cancer-proj`
+- `ECR_REPOSITORY_NAME` = ``
+
 
 

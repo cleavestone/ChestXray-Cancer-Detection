@@ -110,7 +110,7 @@ def get_size(path:Path) -> str:
     size_in_kb=os.path.getsize(path)/1024
     return f"{size_in_kb:.2f} KB" if size_in_kb < 1024 else f"{size_in_kb/1024:.2f} MB"
 
-def decodeTmage(imgstring,filename):
+def decodeImage(imgstring,filename):
     imgdata=base64.b64decode(imgstring)
     with open(filename,'wb') as f:
         f.write(imgdata)

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Medical Image Classifier</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .upload-section {
+            margin: 2rem 0;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 3rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        #imageUpload {
+            display: none;
+        }
+
+        .preview-container {
+            margin: 2rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .preview-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .image-preview {
+            position: relative;
+            display: inline-block;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .preview-image {
+            max-width: 300px;
+            max-height: 300px;
+            width: auto;
+            height: auto;
+            border-radius: 15px;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            color: #ff4757;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .remove-image:hover {
+            background: #ff4757;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .predict-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            margin: 1rem 0;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .predict-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .predict-btn.loading {
+            background: #ccc;
+        }
+
+        .result-container {
+            margin-top: 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .result-container.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+        }
+
+        .result-card.normal {
+            border-left-color: #2ed573;
+        }
+
+        .result-card.cancer {
+            border-left-color: #ff4757;
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .prediction-result {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .prediction-result.normal {
+            color: #2ed573;
+        }
+
+        .prediction-result.cancer {
+            color: #ff4757;
+        }
+
+        .confidence-bar {
+            background: #f1f2f6;
+            border-radius: 25px;
+            height: 8px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 25px;
+            transition: width 0.8s ease;
+        }
+
+        .confidence-fill.normal {
+            background: linear-gradient(135deg, #2ed573, #7bed9f);
+        }
+
+        .confidence-fill.cancer {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+        }
+
+        .confidence-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .detailed-results {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+        }
+
+        .probability-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .probability-value {
+            font-weight: 700;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #495057;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ff4757;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 2rem 1rem;
+            }
+
+            .preview-image {
+                max-width: 250px;
+                max-height: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> AI Medical Classifier</h1>
+            <p>Upload a medical image for AI-powered cancer detection analysis</p>
+        </div>
+
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Click to upload or drag & drop</div>
+                    <div class="upload-subtext">Supports JPG, PNG, GIF (Max 10MB)</div>
+                    <input type="file" id="imageUpload" name="image" accept="image/*" required>
+                </div>
+            </div>
+
+            <div class="preview-container" id="previewContainer">
+                <div class="image-preview">
+                    <img id="previewImage" class="preview-image" alt="Preview">
+                    <button type="button" class="remove-image" id="removeImage">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="predict-btn" id="predictBtn">
+                <i class="fas fa-magic"></i> Analyze Image
+            </button>
+        </form>
+
+        <div class="result-container" id="resultContainer">
+            <div class="result-card" id="resultCard">
+                <div class="result-title">Analysis Results</div>
+                <div class="prediction-result" id="predictionResult"></div>
+                
+                <div class="confidence-text">Confidence Level</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                </div>
+                <div style="text-align: right; font-weight: 600; color: #333; margin-top: 0.5rem;" id="confidencePercent"></div>
+
+                <div class="detailed-results">
+                    <h4 style="margin-bottom: 1rem; color: #333;">Detailed Probabilities</h4>
+                    <div class="probability-item">
+                        <span class="probability-label">Normal Tissue</span>
+                        <span class="probability-value" id="normalProb">0%</span>
+                    </div>
+                    <div class="probability-item">
+                        <span class="probability-label">Adenocarcinoma Cancer</span>
+                        <span class="probability-value" id="cancerProb">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageUpload');
+        const previewContainer = document.getElementById('previewContainer');
+        const previewImage = document.getElementById('previewImage');
+        const removeImageBtn = document.getElementById('removeImage');
+        const predictBtn = document.getElementById('predictBtn');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultCard = document.getElementById('resultCard');
+        const predictionResult = document.getElementById('predictionResult');
+        const confidenceFill = document.getElementById('confidenceFill');
+        const confidencePercent = document.getElementById('confidencePercent');
+        const normalProb = document.getElementById('normalProb');
+        const cancerProb = document.getElementById('cancerProb');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                imageInput.files = files;
+                handleImageSelection();
+            }
+        });
+
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+
+        imageInput.addEventListener('change', handleImageSelection);
+
+        removeImageBtn.addEventListener('click', () => {
+            imageInput.value = '';
+            previewContainer.classList.remove('show');
+            resultContainer.classList.remove('show');
+            errorMessage.style.display = 'none';
+        });
+
+        function handleImageSelection() {
+            const file = imageInput.files[0];
+            if (file) {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('File size must be less than 10MB');
+                    return;
+                }
+
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showError('Please select a valid image file');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImage.src = e.target.result;
+                    previewContainer.classList.add('show');
+                    resultContainer.classList.remove('show');
+                    errorMessage.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!imageInput.files[0]) {
+                showError('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData(form);
+            
+            // Update button state
+            predictBtn.disabled = true;
+            predictBtn.innerHTML = '<div class="loading-spinner"></div>Analyzing...';
+            predictBtn.classList.add('loading');
+            
+            resultContainer.classList.remove('show');
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Analysis failed');
+                }
+
+                displayResults(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Analysis failed. Please try again.');
+            } finally {
+                // Reset button state
+                predictBtn.disabled = false;
+                predictBtn.innerHTML = '<i class="fas fa-magic"></i> Analyze Image';
+                predictBtn.classList.remove('loading');
+            }
+        });
+
+        function displayResults(data) {
+            const isNormal = data.prediction === 'Normal';
+            
+            // Update result card styling
+            resultCard.className = isNormal ? 'result-card normal' : 'result-card cancer';
+            
+            // Update prediction text
+            predictionResult.textContent = data.prediction;
+            predictionResult.className = isNormal ? 'prediction-result normal' : 'prediction-result cancer';
+            
+            // Update confidence bar
+            confidenceFill.style.width = `${data.confidence}%`;
+            confidenceFill.className = isNormal ? 'confidence-fill normal' : 'confidence-fill cancer';
+            confidencePercent.textContent = `${data.confidence}%`;
+            
+            // Update detailed probabilities
+            normalProb.textContent = `${data.class_probabilities.Normal}%`;
+            cancerProb.textContent = `${data.class_probabilities['Adenocarcinoma Cancer']}%`;
+            
+            // Show results with animation
+            resultContainer.classList.add('show');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -4,24 +4,43 @@ from tensorflow.keras.preprocessing import image
 import os
 
 class PredictionPipeline:
-    def __init__(self,filename):
-        self.filename=filename
+    def __init__(self, filename):
+        self.filename = filename
 
     def predict(self):
         # load model
-        model=load_model(os.path.join("artifacts","training","model.h5"))
+        model = load_model(os.path.join("artifacts", "training", "trained_model.h5"))
         
-        imagename=self.filename
-        test_image=image.load_image(imagename,target_size=(224,224))
-        test_image=image.img_to_array(test_image)
-        test_image=np.expand_dims(test_image,axis=0)
-        result=np.argmax(model.predict(test_image),axis=1)
-        print(result)
-
-        if result[0] == 1:
-            prediction = 'Normal'
-            return [{ "image" : prediction}]
-        else:
-            prediction = 'Adenocarcinoma Cancer'
-            return [{ "image" : prediction}]
-
+        imagename = self.filename
+        test_image = image.load_img(imagename, target_size=(224, 224))
+        test_image = image.img_to_array(test_image)
+        test_image = np.expand_dims(test_image, axis=0)
+        
+        # Get raw predictions (probabilities)
+        predictions = model.predict(test_image)
+        result = np.argmax(predictions, axis=1)
+        
+        # Calculate confidence scores
+        confidence_scores = predictions[0]
+        max_confidence = float(np.max(confidence_scores))
+        
+        # Class labels
+        class_labels = ['Adenocarcinoma Cancer', 'Normal']
+        predicted_class = class_labels[result[0]]
+        
+        # Get confidence for each class
+        adenocarcinoma_confidence = float(confidence_scores[0])
+        normal_confidence = float(confidence_scores[1])
+        
+        print(f"Prediction: {predicted_class}")
+        print(f"Confidence: {max_confidence:.2%}")
+        
+        return {
+            "prediction": predicted_class,
+            "confidence": round(max_confidence * 100, 2),
+            "class_probabilities": {
+                "Adenocarcinoma Cancer": round(adenocarcinoma_confidence * 100, 2),
+                "Normal": round(normal_confidence * 100, 2)
+            },
+            "status": "success"
+        }
