@@ -42,9 +42,9 @@ The challenge is to build a robust model that can differentiate between **normal
      - `dvc repro` reruns only modified components.  
    - **MLflow + Dagshub** used to log experiments, metrics, and parameters.  
 
-6. **Deployment Ready**  
+6. **Deployment**  
    - Flask-based **User Interface** (HTML + CSS) to upload X-rays and get predictions.  
-   - Plans to **Dockerize** the app and deploy on **AWS** with CI/CD workflows.  
+   - Dockerize the App and deploy in AWS.  
 
 ---
 
@@ -94,9 +94,9 @@ The challenge is to build a robust model that can differentiate between **normal
 - **VGG16** (Transfer Learning)  
 - **DVC** (Pipeline & Data Versioning)  
 - **MLflow + Dagshub** (Experiment Tracking)  
-- **Flask** (User Interface – in progress)  
-- **Docker** (Containerization – planned)  
-- **AWS** (Deployment – planned)  
+- **Flask** (User Interface)  
+- **Docker** (Containerization)  
+- **AWS** (Deployment)  
 
 ---
 
